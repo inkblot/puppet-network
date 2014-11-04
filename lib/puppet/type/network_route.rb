@@ -2,6 +2,10 @@
 Puppet::Type.newtype(:network_route) do
   @doc = "A network route"
 
+  autorequire(:network_interface) do
+    [ @parameters[:device].value ]
+  end
+
   ensurable
 
   newparam :network do
