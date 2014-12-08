@@ -141,11 +141,11 @@ Puppet::Type.type(:network_interface).provide(:ifupdown) do
       config << "    address #{self.class.address_of(address)}" unless address == :absent
       config << "    netmask #{self.class.netmask_of(address)}" unless address == :absent
       config << "    gateway #{gateway}" unless gateway == :absent
-      config << "    dns-domain #{domain_name}" unless domain_name == :absent
-      config << "    dns-nameservers #{name_servers}" unless name_servers == :absent
-      config << "    dns-search #{search_domain}" unless search_domain == :absent
-      config << "    vlan-raw-device #{vlan_master}" unless vlan_master == :absent
     end
+    config << "    dns-domain #{domain_name}" unless domain_name == :absent
+    config << "    dns-nameservers #{name_servers}" unless name_servers == :absent
+    config << "    dns-search #{search_domain}" unless search_domain == :absent
+    config << "    vlan-raw-device #{vlan_master}" unless vlan_master == :absent
     config << options.map { |k,v| "    #{k} #{v}" }.join("\n")
 
     alternate_addresses.each do |alt_addr|
