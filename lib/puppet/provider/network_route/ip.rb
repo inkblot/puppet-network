@@ -66,10 +66,11 @@ private
   end
 
   def self.route_properties_from_route(route)
+    network = /\// =~ route['route'] ? route['route'] : "#{route['route']}/32"
     {
       :provider => :ip,
       :ensure => :present,
-      :network => route['route'],
+      :network => network,
       :device => route['dev'],
       :gateway => route['via'] || '',
       :source => route['src'] || ''
