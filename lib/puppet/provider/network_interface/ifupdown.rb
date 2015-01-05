@@ -137,7 +137,7 @@ Puppet::Type.type(:network_interface).provide(:ifupdown) do
     config << "auto #{name}" unless !onboot || (!bond_members.empty? && method == :manual)
     config << "allow-hotplug #{name}" if hotplug
     config << "iface #{name} #{self.class.family_of(method, address)} #{method}"
-    if method == :static
+    if [ :static, :tunnel ].include?(method)
       config << "    address #{self.class.address_of(address)}" unless address == :absent
       config << "    netmask #{self.class.netmask_of(address)}" unless address == :absent
       config << "    gateway #{gateway}" unless gateway == :absent

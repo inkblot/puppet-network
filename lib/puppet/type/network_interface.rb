@@ -14,7 +14,7 @@ Puppet::Type.newtype(:network_interface) do
   end
 
   newproperty :method do
-    newvalues(:dhcp, :static, :loopback, :manual)
+    newvalues(:dhcp, :static, :loopback, :manual, :tunnel)
   end
 
   newproperty :address do
