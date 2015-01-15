@@ -24,4 +24,8 @@ Puppet::Type.newtype(:network_route) do
     defaultto ''
   end
 
+  newproperty :metric do
+    defaultto ''
+  end
+
 end

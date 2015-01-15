@@ -61,7 +61,8 @@ private
       :network => resource[:network],
       :device => resource[:device],
       :gateway => resource[:gateway],
-      :source => resource[:source]
+      :source => resource[:source],
+      :metric => resource[:metric]
     }
   end
 
@@ -73,7 +74,8 @@ private
       :network => network,
       :device => route['dev'],
       :gateway => route['via'] || '',
-      :source => route['src'] || ''
+      :source => route['src'] || '',
+      :metric => route['metric'] || ''
     }
   end
 
@@ -92,6 +94,10 @@ private
     unless resource[:gateway] == ''
       args << 'via'
       args << resource[:gateway]
+    end
+    unless resource[:metric] == ''
+      args << 'metric'
+      args << resource[:metric]
     end
     ip(args)
   end
