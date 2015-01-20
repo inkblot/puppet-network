@@ -70,7 +70,7 @@ private
     network = /\// =~ route['route'] ? route['route'] : "#{route['route']}/32"
     {
       :provider => :ip,
-      :ensure => :present,
+      :ensure => route[:ensure] || :present,
       :network => network,
       :device => route['dev'],
       :gateway => route['via'] || '',
@@ -81,7 +81,12 @@ private
 
   def self.routes
     ip('route', 'show').split(/\n/).map do |route|
-      Hash[*['route', route.split(/ +/)].flatten]
+      case route
+      when /^blackhole /
+        Hash[*['route', route.split(/ +/)[1], :ensure, 'blackhole']]
+      else
+        Hash[*['route', route.split(/ +/)].flatten]
+      end
     end
   end
 
