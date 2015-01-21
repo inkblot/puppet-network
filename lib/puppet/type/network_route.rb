@@ -3,17 +3,43 @@ Puppet::Type.newtype(:network_route) do
   @doc = "A network route"
 
   autorequire(:network_interface) do
-    [ @parameters[:device].value ]
+    if @parameters[:ensure].value == :present
+      [ @parameters[:device].value ]
+    else
+      []
+    end
   end
 
-  ensurable
+  ensurable do
+    newvalue(:present) do
+      provider.create
+    end
+
+    newvalue(:absent) do
+      provider.destroy
+    end
+
+    newvalue(:blackhole) do
+      provider.blackhole
+    end
+
+    def retrieve
+      if provider.exists?
+        :present
+      elsif provider.blackhole?
+        :blackhole
+      else
+        :absent
+      end
+    end
+  end
 
   newparam :network do
     isnamevar
   end
 
   newproperty :device do
-    isrequired
+    defaultto ''
   end
   
   newproperty :gateway do

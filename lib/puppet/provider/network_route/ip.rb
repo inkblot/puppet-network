@@ -17,12 +17,20 @@ Puppet::Type.type(:network_route).provide(:ip) do
     @property_hash[:ensure] == :present
   end
 
+  def blackhole?
+    @property_hash[:ensure] == :blackhole
+  end
+
   def create
     @property_flush[:ensure] = :present
   end
 
   def destroy
     @property_flush[:ensure] = :absent
+  end
+
+  def blackhole
+    @property_flush[:ensure] = :blackhole
   end
 
   def self.instances
@@ -44,6 +52,8 @@ Puppet::Type.type(:network_route).provide(:ip) do
       do_destroy
       return
     elsif @property_flush[:ensure] == :present
+      do_create
+    elsif @property_flush[:ensure] == :blackhole
       do_create
     else @property_flush.size > 0
       do_destroy
@@ -70,9 +80,9 @@ private
     network = /\// =~ route['route'] ? route['route'] : "#{route['route']}/32"
     {
       :provider => :ip,
-      :ensure => route[:ensure] || :present,
+      :ensure => route[:ensure],
       :network => network,
-      :device => route['dev'],
+      :device => route['dev'] || '',
       :gateway => route['via'] || '',
       :source => route['src'] || '',
       :metric => route['metric'] || ''
@@ -83,22 +93,32 @@ private
     ip('route', 'show').split(/\n/).map do |route|
       case route
       when /^blackhole /
-        Hash[*['route', route.split(/ +/)[1], :ensure, 'blackhole']]
+        Hash[*[:ensure, :blackhole, 'route', route.split(/ +/)[1..-1]].flatten]
       else
-        Hash[*['route', route.split(/ +/)].flatten]
+        Hash[*[:ensure, :present, 'route', route.split(/ +/)].flatten]
       end
     end
   end
 
   def do_create
-    args = [ 'route', 'add', resource[:network], 'dev', resource[:device] ]
-    unless resource[:source] == ''
-      args << 'src'
-      args << resource[:source]
+    args = [ 'route', 'add' ]
+    if @property_flush[:ensure] == :blackhole or resource[:ensure] == :blackhole
+      args << 'blackhole'
     end
-    unless resource[:gateway] == ''
-      args << 'via'
-      args << resource[:gateway]
+    args << resource[:network]
+    if @property_flush[:ensure] == :present
+      unless resource[:device] == ''
+        args << 'dev'
+        args << resource[:device]
+      end
+      unless resource[:source] == ''
+        args << 'src'
+        args << resource[:source]
+      end
+      unless resource[:gateway] == ''
+        args << 'via'
+        args << resource[:gateway]
+      end
     end
     unless resource[:metric] == ''
       args << 'metric'
