@@ -1,6 +1,5 @@
 # ex: syntax=ruby ts=2 sw=2 et
 require 'puppetx/filemapper'
-require 'json'
 Puppet::Type.type(:network_interface).provide(:ifupdown) do
 
   include PuppetX::FileMapper
