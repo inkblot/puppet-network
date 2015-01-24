@@ -1,5 +1,4 @@
 # ex: syntax=ruby ts=2 sw=2 et
-require 'json'
 
 Puppet::Type.type(:network_route).provide(:ip) do
 
@@ -72,7 +71,9 @@ private
       :device => resource[:device],
       :gateway => resource[:gateway],
       :source => resource[:source],
-      :metric => resource[:metric]
+      :metric => resource[:metric],
+      :table => resource[:table],
+      :protocol => resource[:protocol]
     }
   end
 
@@ -85,19 +86,23 @@ private
       :device => route['dev'] || '',
       :gateway => route['via'] || '',
       :source => route['src'] || '',
-      :metric => route['metric'] || ''
+      :metric => route['metric'] || '',
+      :table => route['table'] || 'main',
+      :protocol => route['proto'] || 'boot'
     }
   end
 
   def self.routes
-    ip('route', 'show').split(/\n/).map do |route|
+    ip('route', 'show', 'table', 'all').split(/\n/).map do |route|
       case route
+      when /\btable\s+(local|unspec)\b/
+        nil
       when /^blackhole /
         Hash[*[:ensure, :blackhole, 'route', route.split(/ +/)[1..-1]].flatten]
       else
         Hash[*[:ensure, :present, 'route', route.split(/ +/)].flatten]
       end
-    end
+    end.compact
   end
 
   def do_create
@@ -124,11 +129,15 @@ private
       args << 'metric'
       args << resource[:metric]
     end
+    args << 'table'
+    args << resource[:table]
+    args << 'proto'
+    args << resource[:protocol]
     ip(args)
   end
 
   def do_destroy
-    ip('route', 'del', resource[:network])
+    ip('route', 'del', resource[:network], 'table', resource[:table])
   end
 
 end

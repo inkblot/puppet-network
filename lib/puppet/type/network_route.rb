@@ -10,6 +10,22 @@ Puppet::Type.newtype(:network_route) do
     end
   end
 
+  autorequire(:route_table) do
+    unless /\A[0-9]+\Z/ === @parameters[:table].value
+      [ @parameters[:table].value ]
+    else
+      []
+    end
+  end
+
+  autorequire(:route_protocol) do
+    unless /\A[0-9]+\Z/ === @parameters[:protocol].value
+      [ @parameters[:protocol].value ]
+    else
+      []
+    end
+  end
+
   ensurable do
     newvalue(:present) do
       provider.create
@@ -52,6 +68,14 @@ Puppet::Type.newtype(:network_route) do
 
   newproperty :metric do
     defaultto ''
+  end
+
+  newproperty :table do
+    defaultto 'main'
+  end
+
+  newproperty :protocol do
+    defaultto 'boot'
   end
 
 end
