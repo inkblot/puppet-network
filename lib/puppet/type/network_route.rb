@@ -50,8 +50,32 @@ Puppet::Type.newtype(:network_route) do
     end
   end
 
+  def self.title_patterns
+    identity = lambda { |x| x }
+    [
+      [
+        /\A(\S+)\Z/,
+        [
+          [ :network, identity ]
+        ]
+      ],
+      [
+        /\A(\S+) (\S+)\Z/,
+        [
+          [ :network, identity ],
+          [ :table, identity ]
+        ]
+      ]
+    ]
+  end
+
   newparam :network do
     isnamevar
+  end
+
+  newparam :table do
+    isnamevar
+    defaultto 'main'
   end
 
   newproperty :device do
@@ -68,10 +92,6 @@ Puppet::Type.newtype(:network_route) do
 
   newproperty :metric do
     defaultto ''
-  end
-
-  newproperty :table do
-    defaultto 'main'
   end
 
   newproperty :protocol do

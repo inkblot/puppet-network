@@ -9,15 +9,24 @@ Puppet::Type.type(:network_route).provide(:ip) do
 
   def initialize(value = {})
     super(value)
-    @property_hash = self.class.route(resource[:network])
     @property_flush = {}
+    @filled = false
+  end
+
+  def fill_properties
+    unless @filled
+      @property_hash = self.class.route(resource[:network], resource[:table])
+      @filled = true
+    end
   end
 
   def exists?
+    fill_properties
     @property_hash[:ensure] == :present
   end
 
   def blackhole?
+    fill_properties
     @property_hash[:ensure] == :blackhole
   end
 
@@ -61,11 +70,11 @@ private
       :provider => :ip,
       :ensure => resource[:ensure],
       :network => resource[:network],
+      :table => resource[:table],
       :device => resource[:device],
       :gateway => resource[:gateway],
       :source => resource[:source],
       :metric => resource[:metric],
-      :table => resource[:table],
       :protocol => resource[:protocol]
     }
   end
@@ -76,21 +85,21 @@ private
       :provider => :ip,
       :ensure => route[:ensure],
       :network => network,
+      :table => route['table'] || 'main',
       :device => route['dev'] || '',
       :gateway => route['via'] || '',
       :source => route['src'] || '',
       :metric => route['metric'] || '',
-      :table => route['table'] || 'main',
       :protocol => route['proto'] || 'boot'
     }
   end
 
-  def self.route(network)
-    marks = ip('route', 'show', network, 'table', 'all').split(/\n/).map do |route|
+  def self.route(network, table = 'main')
+    marks = ip('route', 'show', network, 'table', table).split(/\n/).map do |route|
       parse_route(route)
     end.compact
     if marks.empty?
-      { :ensure => :absent, :network => network }
+      { :ensure => :absent, :network => network, :table => table }
     else
       marks.first
     end
