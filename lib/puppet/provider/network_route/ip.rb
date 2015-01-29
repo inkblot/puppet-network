@@ -9,6 +9,7 @@ Puppet::Type.type(:network_route).provide(:ip) do
 
   def initialize(value = {})
     super(value)
+    @property_hash = self.class.route(resource[:network])
     @property_flush = {}
   end
 
@@ -34,15 +35,7 @@ Puppet::Type.type(:network_route).provide(:ip) do
 
   def self.instances
     routes.collect do |route|
-      new(route_properties_from_route(route))
-    end
-  end
-
-  def self.prefetch(resources)
-    instances.each do |prov|
-      if resource = resources[prov.network]
-        resource.provider = prov
-      end
+      new(route)
     end
   end
 
@@ -92,17 +85,33 @@ private
     }
   end
 
+  def self.route(network)
+    marks = ip('route', 'show', network, 'table', 'all').split(/\n/).map do |route|
+      parse_route(route)
+    end.compact
+    if marks.empty?
+      { :ensure => :absent, :network => network }
+    else
+      marks.first
+    end
+  end
+
   def self.routes
     ip('route', 'show', 'table', 'all').split(/\n/).map do |route|
+      parse_route(route)
+    end.compact
+  end
+
+  def self.parse_route(route)
       case route
       when /\btable\s+(local|unspec)\b/
-        nil
+        return nil
       when /^blackhole /
-        Hash[*[:ensure, :blackhole, 'route', route.split(/ +/)[1..-1]].flatten]
+        route_hash = Hash[*[:ensure, :blackhole, 'route', route.split(/ +/)[1..-1]].flatten]
       else
-        Hash[*[:ensure, :present, 'route', route.split(/ +/)].flatten]
+        route_hash = Hash[*[:ensure, :present, 'route', route.split(/ +/)].flatten]
       end
-    end.compact
+      route_properties_from_route(route_hash)
   end
 
   def do_create
