@@ -145,7 +145,7 @@ Puppet::Type.type(:network_interface).provide(:ifupdown) do
     config << "    dns-nameservers #{name_servers}" unless name_servers == :absent
     config << "    dns-search #{search_domain}" unless search_domain == :absent
     config << "    vlan-raw-device #{vlan_master}" unless vlan_master == :absent
-    config << options.map { |k,v| "    #{k} #{v}" }.join("\n")
+    config << options.map { |k,v| "    #{k} #{v}" }.join("\n")  unless options == nil
 
     alternate_addresses.each do |alt_addr|
       config << ''
