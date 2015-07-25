@@ -1,5 +1,5 @@
 name	'inkblot/network'
-version '2.1.0'
+version '2.1.1'
 source	'git://github.com/inkblot/puppet-network'
 author	'inkblot'
 license	'Apache 2.0'
