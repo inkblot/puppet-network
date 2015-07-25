@@ -237,8 +237,8 @@ Puppet::Type.type(:network_interface).provide(:ifupdown) do
       if primaries.one?
         primary = primaries.first
       elsif primaries.empty?
-        primary = alt_insts.sort_by(:address).first
-        alt_insts = alt_insts - primary
+        primary = alt_insts.sort_by { |i| i.options['address'] }.first
+        alt_insts = alt_insts - [ primary ]
       else
         raise Puppet::Error, "No discernable primary instance for interface #{@name}"
       end
