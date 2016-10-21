@@ -57,7 +57,7 @@ Puppet::Type.type(:network_interface).provide(:ifupdown) do
       instance = Instance.new(name, family, method)
 
       # xenial cloudimg has lo defined twice
-      unless instance.name == 'lo' && parsed_data.instances.any? { |i| instance.name == 'lo' }
+      unless instance.name == 'lo' && parsed_data.instances.any? { |i| instance.name == 'lo' && instance.method == :loopback }
         parsed_data.instances << instance
       end
       return [ false, lambda { |parsed_file, line| parse_interface_line(parsed_file, line, instance) } ]
