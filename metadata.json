@@ -1,0 +1,24 @@
+{
+  "name": "inkblot/network",
+  "version": "3.0.0",
+  "author": "inkblot",
+  "license": "Apache-2.0",
+  "summary": "Network routes and interfaces",
+  "source": "git://github.com/inkblot/puppet-network.git",
+  "project_page": "https://github.com/inkblot/puppet-.bind",
+  "issues_url": "https://github.com/inkblot/puppet-.bind/issues",
+  "tags": [ "network", "interface", "route" ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [ "7.7" ]
+    },
+    {
+      "operatingsystem": "Ubuntu",
+      "operatingsystemrelease": [ "12.04", "14.04", "16.04" ]
+    }
+  ],
+  "dependencies": [
+    { "name": "adrien/filemapper", "version_requirement": "1.1.3" }
+  ]
+}
