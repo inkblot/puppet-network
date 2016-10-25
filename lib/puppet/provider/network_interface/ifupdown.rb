@@ -20,7 +20,7 @@ Puppet::Type.type(:network_interface).provide(:ifupdown) do
 
   def self.parse_interfaces_from_file(parsed_data, filename, contents)
     lines = contents.lines
-    currently = lambda { |parsed_data, line| parse_top_level_line(parsed_data, line) }
+    currently = lambda { |pd, line| parse_top_level_line(pd, line) }
     lines.each do |line|
       # Obliterate the comments
       line.sub!(/#.*$/, '')
@@ -55,7 +55,11 @@ Puppet::Type.type(:network_interface).provide(:ifupdown) do
       family = parts[2].intern
       method = parts[3].intern
       instance = Instance.new(name, family, method)
-      parsed_data.instances << instance
+
+      # xenial cloudimg has lo defined twice
+      unless instance.name == 'lo' && parsed_data.instances.any? { |i| instance.name == 'lo' && instance.method == :loopback }
+        parsed_data.instances << instance
+      end
       return [ false, lambda { |parsed_file, line| parse_interface_line(parsed_file, line, instance) } ]
 
     when /^\s*source\s/
@@ -168,7 +172,11 @@ Puppet::Type.type(:network_interface).provide(:ifupdown) do
   end
 
   def flush
-    ifdown(resource[:name])
+    begin
+      ifdown(resource[:name])
+    rescue Puppet::ExecutionFailure
+      # ignored
+    end
     super
     ifup(resource[:name]) if resource[:ensure] == :present
   end
