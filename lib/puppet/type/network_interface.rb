@@ -25,8 +25,8 @@ Puppet::Type.newtype(:network_interface) do
     defaultto :absent
   end
 
-  newproperty :name_servers do
-    defaultto :absent
+  newproperty (:name_servers, :array_matching => :all) do
+    defaultto []
   end
 
   newproperty :search_domain do
