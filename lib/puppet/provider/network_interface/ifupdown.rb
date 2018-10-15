@@ -146,8 +146,10 @@ Puppet::Type.type(:network_interface).provide(:ifupdown) do
       config << "    gateway #{gateway}" unless gateway == :absent
     end
     config << "    dns-domain #{domain_name}" unless domain_name == :absent
-    name_servers.each do |ns|
-        config << "    dns-nameserver #{ns}"
+    unless name_servers == :absent
+        name_servers.each do |ns|
+            config << "    dns-nameserver #{ns}"
+        end
     end
     config << "    dns-search #{search_domain}" unless search_domain == :absent
     config << "    vlan-raw-device #{vlan_master}" unless vlan_master == :absent
