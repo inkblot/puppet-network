@@ -88,6 +88,8 @@ Puppet::Type.type(:network_interface).provide(:ifupdown) do
       setter = "#{key}=".intern
       if interface.respond_to? setter
         interface.send setter, value
+      elsif interface.options.key?(key)
+        interface.options[key] = Array(interface.options[key]) << value
       else
         interface.options[key] = value
       end
@@ -146,10 +148,8 @@ Puppet::Type.type(:network_interface).provide(:ifupdown) do
       config << "    gateway #{gateway}" unless gateway == :absent
     end
     config << "    dns-domain #{domain_name}" unless domain_name == :absent
-    unless name_servers == :absent
-        name_servers.each do |ns|
-            config << "    dns-nameserver #{ns}"
-        end
+    name_servers.each do |ns|
+        config << "    dns-nameserver #{ns}"
     end
     config << "    dns-search #{search_domain}" unless search_domain == :absent
     config << "    vlan-raw-device #{vlan_master}" unless vlan_master == :absent
@@ -261,12 +261,12 @@ Puppet::Type.type(:network_interface).provide(:ifupdown) do
       @method = primary.method
       @address = to_cidr(primary.options['address'], primary.options['netmask'])
       @gateway = primary.options['gateway']
-      @name_servers = primary.options['dns-nameservers']
+      @name_servers = primary.options['dns-nameserver']
       @search_domain = primary.options['dns-search']
       @domain_name = primary.options['dns-domain']
       @vlan_master = primary.options['vlan-raw-device']
       @options = primary.options.reject do |k,v|
-        %w(address netmask gateway dns-nameservers dns-search dns-domain vlan-raw-device).member? k
+        %w(address netmask gateway dns-nameserver dns-search dns-domain vlan-raw-device).member? k
       end
 
       @alternate_addresses = alt_insts.map do |instance|
@@ -307,6 +307,8 @@ Puppet::Type.type(:network_interface).provide(:ifupdown) do
       when :options
         {}
       when :bond_members
+        []
+      when :name_servers
         []
       else
         :absent
