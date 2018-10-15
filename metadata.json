@@ -1,6 +1,6 @@
 {
   "name": "inkblot/network",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "author": "inkblot",
   "license": "Apache-2.0",
   "summary": "Network routes and interfaces",
