@@ -27,6 +27,10 @@ Puppet::Type.newtype(:network_interface) do
 
   newproperty(:name_servers, :array_matching => :all) do
     defaultto []
+    
+    def insync?(is)
+      Array(should) == Array(is)
+    end
   end
 
   newproperty :search_domain do
